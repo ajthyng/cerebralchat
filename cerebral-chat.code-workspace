@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"javascript.preferences.quoteStyle": "single",
+		"typescript.preferences.quoteStyle": "single",
+		"editor.formatOnSave": false,
+		"javascript.format.enable": false,
+		"files.autoSave": "onFocusChange",
+		"javascript.validate.enable": false,
+		"files.watcherExclude": {
+			"**/.git/**": true,
+			"**/dist/**": true
+		},
+    "editor.tabSize": 2,
+		"editor.codeActionsOnSave": {
+			"source.fixAll": true
+		}
+	}
+}
