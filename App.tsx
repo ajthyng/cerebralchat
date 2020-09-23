@@ -1,11 +1,9 @@
 import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import { Chat } from './src/components/Chat/Chat'
 
 const App = () => {
   return (
-    <View
-      style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'tomato' }}
-    />
+    <Chat />
   )
 }
 

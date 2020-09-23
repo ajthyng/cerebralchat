@@ -9,5 +9,9 @@ module.exports = {
     'react',
     '@typescript-eslint',
     'react-hooks'
-  ]
+  ],
+  rules: {
+    'no-unused-vars': "off",
+    'react/prop-types': "off"
+  }
 };
