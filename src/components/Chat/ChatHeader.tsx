@@ -6,7 +6,6 @@ interface ChatHeaderProps {
 }
 
 const Profile = styled.View`
-  /* aspect-ratio: 1; */
   height: 32px;
   width: 32px;
   background-color: #CBD3DC;

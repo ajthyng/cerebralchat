@@ -16,7 +16,7 @@ const Container = styled.View`
   align-items: center;
   justify-content: center;
   elevation: 5;
-  box-shadow: 0 0 45px #4B91FA;
+  box-shadow: 0 0 10px #4B91FA80;
 `
 
 export const SendChatMessage: React.FunctionComponent<SendChatMessageProps> = (props) => {

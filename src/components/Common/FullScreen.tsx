@@ -9,7 +9,7 @@ export const FullScreen: React.FunctionComponent<FullScreenProps> = (props) => {
   const { style, children } = props
   return (
     <View
-      style={[style, StyleSheet.absoluteFillObject]}
+      style={{ flex: 1 }}
     >
       {children}
     </View>
