@@ -19,7 +19,7 @@ const Message = styled.Text`
 `
 
 export const ErrorMessage: React.FunctionComponent<ErrorMessageProps> = (props) => {
-  const defaultMessage = 'We\'re having trouble loading this content. Please swipe down to try again.'
+  const defaultMessage = 'We\'re having trouble loading this content. Please reload the app to try again.'
   const { message = defaultMessage } = props
   return (
     <Container>

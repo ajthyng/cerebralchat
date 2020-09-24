@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components/native'
+import { useEvent } from '../../hooks/useEvent'
 import { getChatAI, LiveSupport } from '../../utils/ChatAI'
 import { ErrorMessage } from '../Common/ErrorMessage'
 import { FullScreen } from '../Common/FullScreen'
@@ -33,7 +34,7 @@ export const Chat: React.FunctionComponent<ChatProps> = (props) => {
     return responseState === 'failure'
   }, [responseState])
 
-  useEffect(() => {
+  const loadChatAI = useCallback(() => {
     getChatAI().then(result => {
       liveSupport.current = new LiveSupport(result, user, supportId)
       _setResponseState('success')
@@ -42,6 +43,26 @@ export const Chat: React.FunctionComponent<ChatProps> = (props) => {
       _setResponseState('failure')
     })
   }, [props.user])
+
+  useEffect(() => {
+    loadChatAI()
+  }, [loadChatAI])
+
+  const onMessagesUpdate = useCallback(() => {
+    _setMessages([...liveSupport.current?.messageHistory ?? []])
+  }, [])
+
+  useEvent('messages-update', onMessagesUpdate)
+  useEvent('refresh-chat', loadChatAI)
+
+  const handleSend = useCallback((input: string) => {
+    if (liveSupport.current) {
+      liveSupport.current.receiveMessage({
+        text: input,
+        from: user
+      })
+    }
+  }, [])
 
   return (
     <Container>
@@ -60,6 +81,7 @@ export const Chat: React.FunctionComponent<ChatProps> = (props) => {
       }
       <ChatFooter
         loading={isLoading}
+        onSend={handleSend}
       />
     </Container>
   )

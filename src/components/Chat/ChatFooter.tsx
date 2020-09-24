@@ -4,6 +4,7 @@ import { SendChatMessage } from './SendChatMessage'
 
 interface ChatFooterProps {
   loading: boolean
+  onSend: (input: string) => void
 }
 
 const Container = styled.View`
@@ -23,12 +24,18 @@ const ChatInput = styled.TextInput`
 `
 
 export const ChatFooter: React.FunctionComponent<ChatFooterProps> = (props) => {
-  const { loading } = props
+  const { loading, onSend } = props
   const [text, _setText] = useState('')
 
   const setText = useCallback((input: string) => {
     _setText(input)
   }, [])
+
+  const handleSend = useCallback(() => {
+    if (text.length === 0) return
+    onSend(text)
+    _setText('')
+  }, [text, onSend])
 
   return (
     <Container>
@@ -45,7 +52,7 @@ export const ChatFooter: React.FunctionComponent<ChatFooterProps> = (props) => {
       />
       <SendChatMessage
         disabled={loading}
-        onSend={() => null}
+        onSend={handleSend}
       />
     </Container>
   )

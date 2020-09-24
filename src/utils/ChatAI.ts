@@ -1,16 +1,12 @@
 import { fakeID } from './Helpers'
+import { Subject } from './Subject'
 
 export const getChatAI = async () => {
-  try {
-    const response = await fetch('https://gist.githubusercontent.com/pcperini/97fe41fc42ac1c610548cbfebb0a4b88/raw/cc07f09753ad8fefb308f5adae15bf82c7fffb72/cerebral_challenge.json')
-
-    // I would normally do exhaustive checking here to
-    // ensure the response from the API can be used.
-    const data = await response.json() as AIEntry[]
-    return data
-  } catch (err) {
-    return []
-  }
+  const response = await fetch('https://gist.githubusercontent.com/pcperini/97fe41fc42ac1c610548cbfebb0a4b88/raw/cc07f09753ad8fefb308f5adae15bf82c7fffb72/cerebral_challenge.json')
+  // I would normally do exhaustive checking here to
+  // ensure the response from the API can be used.
+  const data = await response.json() as AIEntry[]
+  return data
 }
 
 type AIEntry = {
@@ -34,8 +30,8 @@ class SupportQuestion {
     this.validation = entry.validation
   }
 
-  private get isEndState () {
-    return !!this.paths
+  get isEndState () {
+    return !this.paths
   }
 
   get nextPath () {
@@ -44,7 +40,10 @@ class SupportQuestion {
 
   async validate (input: string) {
     if (this.isEndState || this.validation === false) return false
-    if (this.validation === true) return true
+    if (this.validation === true) {
+      if (typeof this.paths === 'number') this._nextPath = this.paths
+      return true
+    }
 
     if (typeof this.validation === 'string') {
       const regexp = new RegExp(this.validation)
@@ -57,12 +56,15 @@ class SupportQuestion {
 
     if (Array.isArray(this.validation)) {
       let isValid = false
-      for (const entry of this.validation) {
-        isValid = entry.toLowerCase() === input.toLowerCase()
+      for (let i = 0; i < this.validation.length; i++) {
+        const entry = this.validation[i]
+        isValid = entry.toLowerCase().trim() === input.toLowerCase().trim()
         if (isValid && typeof this.paths === 'object') {
           this._nextPath = this.paths[entry]
-          break
+        } else if (isValid && typeof this.paths === 'number') {
+          this._nextPath = this.paths
         }
+        if (isValid) break
       }
       return isValid
     }
@@ -116,39 +118,87 @@ export class LiveSupport {
     }
   }
 
+  private askAgain () {
+    const baseMessage = "I'm sorry, could you try answering this question again?"
+    let additionalOptions = ''
+    if (this.current && Array.isArray(this.current.validation)) {
+      const firstSet = this.current.validation.slice(0, -1)
+      if (firstSet < this.current.validation) {
+        const lastItem = this.current.validation.slice(-1)
+        additionalOptions = `Possible answers are: ${firstSet.join(', ')}, and ${lastItem}`
+      } else {
+        additionalOptions = `The only answer is: ${this.current.validation.join(' ')}`
+      }
+      return baseMessage + additionalOptions
+    }
+    return baseMessage
+  }
+
   async receiveMessage (message: Omit<Message, 'id' | 'to'>) {
-    this.messageHistory.push({
+    this.addToHistory({
       ...message,
-      to: this.supportId,
-      id: fakeID()
+      to: this.supportId
     })
 
     const isValid = await this.isValid(message.text)
     if (isValid) {
       await this.next()
-      return this.current?.question
+      if (this.current) {
+        this.addToHistory({
+          to: message.from,
+          from: this.supportId,
+          text: this.current.question
+        })
+      }
     } else {
-      return `I'm sorry, could you try answering this question again?\n${this.current?.question}`
+      if (this.current && !this.current.isEndState) {
+        this.addToHistory({
+          text: this.askAgain(),
+          from: this.supportId,
+          to: message.from
+        })
+      } else {
+        this.addToHistory({
+          text: 'I\'m sorry, this chat session has ended. Please reload your app if you\'d like to chat again.',
+          from: this.supportId,
+          to: message.from
+        })
+      }
     }
+    Subject.next('messages-update')
   }
 
   private async isValid (input: string) {
+    if (this.current) {
     // I don't want to accidentally discard a valid response with an invalid one if the user has spammed messages
-    const isValid = this.current && await this.current.validate(input)
+      const isValid = await this.current.validate(input)
 
-    if (this.currentIsValid === undefined || this.currentIsValid === false) {
-      this.currentIsValid = isValid
+      if (this.currentIsValid === undefined || this.currentIsValid === false) {
+        this.currentIsValid = isValid
+      }
+
+      // I do want to replace an existing valid response with another valid response
+      if (isValid) this.currentIsValid = isValid
+
+      return this.currentIsValid
+    } else {
+      return false
     }
+  }
 
-    // I do want to replace an existing valid response with another valid response
-    if (isValid) this.currentIsValid = isValid
-
-    return this.currentIsValid
+  private addToHistory ({ from, to, text }: { from: string, to: string, text: string }) {
+    this.messageHistory.splice(0, 0, {
+      from,
+      to,
+      text,
+      id: fakeID()
+    })
   }
 
   private async next () {
     if (this.current && this.current.hasNext()) {
       this.current = this.questions.get(this.current.nextPath)
+      this.currentIsValid = undefined
     }
   }
 }
