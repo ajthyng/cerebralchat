@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components/native'
 
 interface ChatHeaderProps {
-
+  supportId: string
 }
 
 const Profile = styled.View`
@@ -29,10 +29,11 @@ const Name = styled.Text`
 `
 
 export const ChatHeader: React.FunctionComponent<ChatHeaderProps> = (props) => {
+  const { supportId } = props
   return (
     <Container>
       <Profile />
-      <Name>Marlanne Singer</Name>
+      <Name>{supportId}</Name>
     </Container>
   )
 }

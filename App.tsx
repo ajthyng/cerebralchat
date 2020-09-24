@@ -3,7 +3,10 @@ import { Chat } from './src/components/Chat/Chat'
 
 const App = () => {
   return (
-    <Chat />
+    <Chat
+      user='Andrew'
+      supportId='Marlanne Singer'
+    />
   )
 }
 

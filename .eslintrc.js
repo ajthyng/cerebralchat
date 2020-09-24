@@ -10,6 +10,9 @@ module.exports = {
     '@typescript-eslint',
     'react-hooks'
   ],
+  globals: {
+    fetch: false
+  },
   rules: {
     'no-unused-vars': "off",
     'react/prop-types': "off"

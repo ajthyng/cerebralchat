@@ -1,10 +1,9 @@
 import React, { useCallback, useState } from 'react'
-import { NativeSyntheticEvent, TextInput, TextInputChangeEventData } from 'react-native'
 import styled from 'styled-components/native'
 import { SendChatMessage } from './SendChatMessage'
 
 interface ChatFooterProps {
-
+  loading: boolean
 }
 
 const Container = styled.View`
@@ -24,6 +23,7 @@ const ChatInput = styled.TextInput`
 `
 
 export const ChatFooter: React.FunctionComponent<ChatFooterProps> = (props) => {
+  const { loading } = props
   const [text, _setText] = useState('')
 
   const setText = useCallback((input: string) => {
@@ -41,8 +41,12 @@ export const ChatFooter: React.FunctionComponent<ChatFooterProps> = (props) => {
         underlineColorAndroid='transparent'
         placeholder='Type here...'
         selectionColor='#9BAFFC'
+        editable={!loading}
       />
-      <SendChatMessage />
+      <SendChatMessage
+        disabled={loading}
+        onSend={() => null}
+      />
     </Container>
   )
 }

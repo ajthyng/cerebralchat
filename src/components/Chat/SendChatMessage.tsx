@@ -1,9 +1,12 @@
 import React from 'react'
-import { Button, Text, TouchableNativeFeedback } from 'react-native'
+import { GestureResponderEvent, TouchableNativeFeedback } from 'react-native'
 import styled from 'styled-components/native'
+import { getChatAI } from '../../utils/ChatAI'
+import { SendChatIcon } from './SendChatIcon'
 
 interface SendChatMessageProps {
-
+  disabled: boolean
+  onSend: (event: GestureResponderEvent) => void
 }
 
 const Container = styled.View`
@@ -12,20 +15,23 @@ const Container = styled.View`
   border-radius: 2px;
   align-items: center;
   justify-content: center;
-`
-
-const Label = styled.Text`
-  color: white;
+  elevation: 5;
+  box-shadow: 0 0 45px #4B91FA;
 `
 
 export const SendChatMessage: React.FunctionComponent<SendChatMessageProps> = (props) => {
+  const { disabled, onSend } = props
   return (
     <TouchableNativeFeedback
-      onPress={() => null}
+      onPress={onSend}
+      disabled={disabled}
     >
-      <Container
-      >
-        <Label>Send</Label>
+      <Container>
+        <SendChatIcon
+          width={24}
+          height={24}
+          fill='#FFFFFF'
+        />
       </Container>
     </TouchableNativeFeedback>
   )
